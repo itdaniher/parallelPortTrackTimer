@@ -1,0 +1,5 @@
+This code was written awhile back for a local boyscout troop.
+
+It constantly polls the parallel port using a [section of code from pyParallel](http://pyserial.svn.sourceforge.net/viewvc/pyserial/trunk/pyparallel/parallel/parallelppdev.py?view=log) to monitor for changes.
+
+It's designed with a fairly intuitive command-line UI and offers lane identification as well as timing.
