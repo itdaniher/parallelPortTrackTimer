@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # parallel port access using the ppdev driver
+#from the pyparallel project - all rights remain property of the original owner.
 
 import sys
 import struct
