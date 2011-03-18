@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # parallel port access using the ppdev driver
-#from the pyparallel project - all rights remain property of the original owner.
 
 import sys
 import struct
@@ -21,7 +20,7 @@ def _IOR(type,nr,size): return _IOC(_IOC_READ,  type, nr, sizeof(size))
 def _IOW(type,nr,size): return _IOC(_IOC_WRITE, type, nr, sizeof(size))
 
 _IOC_SIZEBITS   = 14
-_IOC_SIZEMASK   = (1L << _IOC_SIZEBITS ) - 1
+_IOC_SIZEMASK   = (1 << _IOC_SIZEBITS ) - 1
 _IOC_NRSHIFT    = 0
 _IOC_NRBITS     = 8
 _IOC_TYPESHIFT  = _IOC_NRSHIFT + _IOC_NRBITS
@@ -32,13 +31,13 @@ IOCSIZE_SHIFT   = _IOC_SIZESHIFT
 
 # Python 2.2 uses a signed int for the ioctl() call, so ...
 if ( sys.version_info[0] < 3 ) or ( sys.version_info[1] < 3 ):
- _IOC_WRITE      =  1L
- _IOC_READ       = -2L
- _IOC_INOUT      = -1L
+ _IOC_WRITE      =  1
+ _IOC_READ       = -2
+ _IOC_INOUT      = -1
 else:
- _IOC_WRITE      =  1L
- _IOC_READ       =  2L
- _IOC_INOUT      =  3L
+ _IOC_WRITE      =  1
+ _IOC_READ       =  2
+ _IOC_INOUT      =  3
 
 _IOC_DIRSHIFT   = _IOC_SIZESHIFT + _IOC_SIZEBITS
 IOC_INOUT       = _IOC_INOUT << _IOC_DIRSHIFT
@@ -184,15 +183,21 @@ class Parallel:
             self.device = port
         else:
             self.device = "/dev/parport%d" % port
+        self._fd = None
         self._fd = os.open(self.device, os.O_RDWR)
-        self.PPEXCL()
-        self.PPCLAIM()
-        self.setDataDir(1)
-        self.setData(0)
+        try:
+            self.PPEXCL()
+            self.PPCLAIM()
+            self.setDataDir(1)
+            self.setData(0)
+        except IOError:
+            os.close(self._fd)
+            self._fd = None
+            raise
 
     def __del__(self):
-        self.PPRELEASE()
         if self._fd is not None:
+            self.PPRELEASE()
             os.close(self._fd)
 
     def timevalToFloat(self, timeval):
@@ -562,8 +567,12 @@ class Parallel:
         """Sets the states of the data bus line drivers (pins 2-9)"""
         self._data=d
         return self.PPWDATA(d)
+    
+    def getData(self):
+        """Gets the states of the data bus line (pin 2-9)"""
+        return self.PPRDATA()
 
-    #status lines
+    # status lines
     def getInError(self):
         """Returns the level on the nFault pin (15)"""
         return (self.PPRSTATUS() & PARPORT_STATUS_ERROR) != 0
