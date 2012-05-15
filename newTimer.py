@@ -41,8 +41,10 @@ while len(set(lanes)) != numTracks:
 				times.append(time.time()-startTime)
 #tell the system to ignore future events on that lane
 				exclude.append(a)
-#form tuples from lanes and times, print them
-print zip(lanes, times)
+#form tuples from lanes and times, print them in one column
+for datum in zip(lanes, times):
+	print datum
+
 #wait for user to type "close," then quit
 while True:
         if str(raw_input("type 'close' to exit: ")) == "close":
